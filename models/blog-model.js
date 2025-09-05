@@ -1,24 +1,24 @@
 import mongoose from 'mongoose';
 
 const blogSchema = new mongoose.Schema({
-    title: { 
-        type: String, 
+    title: {
+        type: String,
         required: [true, 'Title is required'],
         trim: true,
         maxlength: [100, 'Title cannot exceed 100 characters']
     },
-    author: { 
-        type: String, 
+    author: {
+        type: String,
         trim: true,
         required: [true, 'Author name is required']
     },
-    description: { 
-        type: String, 
+    description: {
+        type: String,
         required: [true, 'Description is required'],
         trim: true,
         maxlength: [1000, 'Description cannot exceed 1000 characters']
     }
-}, { 
+}, {
     timestamps: true
 });
 
