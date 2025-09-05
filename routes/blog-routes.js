@@ -6,6 +6,7 @@ const BlogRouter = express.Router();
 
 // GET all blogs - Retrieve and return all blog posts sorted by creation date (oldest first)
 BlogRouter.get('/blogs', async (req, res) => {
+    console.log(`Request received at req.originalUrl: ${req.originalUrl}`);
     try {
         // Fetch all blogs from database and sort by creation date (ascending)
         const allBlogs = await BlogModel.find().sort({ createdAt: 1 });
@@ -17,18 +18,21 @@ BlogRouter.get('/blogs', async (req, res) => {
             blogs: allBlogs
         });
     } catch (err) {
+        console.error(`Error occurred while fetching blogs: ${err.message}`);
         res.status(500).json({ error: err.message });
     }
 });
 
 // GET single blog by ID - Search for a specific blog using MongoDB ObjectId
 BlogRouter.get('/blog/id/:id', async (req, res) => {
+    console.log(`Request received at req.originalUrl: ${req.originalUrl}`);
     try {
         // Extract the ID parameter from the URL
         const { id } = req.params;
 
         // Validate that the provided ID is a valid MongoDB ObjectId format
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            console.error(`Invalid blog ID format: ${id}`);
             return res.status(400).json({ error: 'Invalid blog ID format' });
         }
 
@@ -37,6 +41,7 @@ BlogRouter.get('/blog/id/:id', async (req, res) => {
 
         // Check if blog was found
         if (!blog) {
+            console.error(`Blog not found with ID: ${id}`);
             return res.status(404).json({ error: 'Blog not found' });
         }
 
@@ -46,21 +51,25 @@ BlogRouter.get('/blog/id/:id', async (req, res) => {
         });
 
     } catch (err) {
+        console.error(`Error occurred while fetching blog by ID: ${err.message}`);
         res.status(500).json({ error: err.message });
     }
 });
 
 // PUT update blog by ID - Update an existing blog post using its ID
 BlogRouter.put('/blog/id/:id', async (req, res) => {
+    console.log(`Request received at req.originalUrl: ${req.originalUrl}`);
     try {
         const { id } = req.params;
         const updatedData = req.body.data;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            console.error(`Invalid blog ID format: ${id}`);
             return res.status(400).json({ error: 'Invalid blog ID format' });
         }
 
         if (!updatedData || Object.keys(updatedData).length === 0) {
+            console.error('No update data provided in request body');
             return res.status(400).json({ error: 'No update data provided' });
         }
 
@@ -78,6 +87,7 @@ BlogRouter.put('/blog/id/:id', async (req, res) => {
         );
 
         if (!updateBlog) {
+            console.error(`Blog not found with ID: ${id}`);
             return res.status(404).json({ error: 'Blog not found' });
         }
 
@@ -87,18 +97,21 @@ BlogRouter.put('/blog/id/:id', async (req, res) => {
         });
 
     } catch (err) {
+        console.error(`Error occurred while updating blog: ${err.message}`);
         res.status(500).json({ error: err.message });
     }
 });
 
 // DELETE blog by ID - Remove a blog post from the database using its ID
 BlogRouter.delete('/blog/id/:id', async (req, res) => {
+    console.log(`Request received at req.originalUrl: ${req.originalUrl}`);
     try {
         // Extract the ID parameter from the URL
         const { id } = req.params;
 
         // Validate that the provided ID is a valid MongoDB ObjectId format
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            console.error(`Invalid blog ID format: ${id}`);
             return res.status(400).json({ error: 'Invalid blog ID format' });
         }
 
@@ -107,6 +120,7 @@ BlogRouter.delete('/blog/id/:id', async (req, res) => {
 
         // Check if blog was found
         if (!deletedBlog) {
+            console.error(`Blog not found with ID: ${id}`);
             return res.status(404).json({ error: 'Blog not found' });
         }
 
@@ -115,12 +129,14 @@ BlogRouter.delete('/blog/id/:id', async (req, res) => {
         });
 
     } catch (err) {
+        console.error(`Error occurred while deleting blog: ${err.message}`);
         res.status(500).json({ error: err.message });
     }
 });
 
 // GET blogs by author - Search for blogs by author name (case-insensitive partial match)
 BlogRouter.get('/blog/author', async (req, res) => {
+    console.log(`Request received at req.originalUrl: ${req.originalUrl}`);
     try {
         // Extract author from query parameter: ?name=John%20Doe
         const blogAuthor = req.query.name;
@@ -130,7 +146,8 @@ BlogRouter.get('/blog/author', async (req, res) => {
             author: { $regex: blogAuthor, $options: 'i' }
         }).sort({ createdAt: 1 });
 
-        if (!allBlogs || allBlogs.length == 0) {
+        if (!allBlogs || allBlogs.length === 0) {
+            console.error(`No blogs found for author: ${blogAuthor}`);
             return res.status(404).json({ error: 'Blog not found' });
         }
 
@@ -141,12 +158,14 @@ BlogRouter.get('/blog/author', async (req, res) => {
         });
 
     } catch (err) {
+        console.error(`Error occurred while fetching blogs by author: ${err.message}`);
         res.status(500).json({ error: err.message });
     }
 });
 
 // POST new blog - Create and save a new blog post to the database
 BlogRouter.post('/blogs', async (req, res) => {
+    console.log(`Request received at req.originalUrl: ${req.originalUrl}`);
     try {
         // 1. Extract data (synchronous)
         // Extract blog data from nested request body structure
@@ -171,6 +190,7 @@ BlogRouter.post('/blogs', async (req, res) => {
 
     } catch (err) {
         // 5. If any error occurs during saving, this runs instead
+        console.error(`Error occurred while creating blog: ${err.message}`);
         res.status(400).json({ error: err.message });
     }
 });

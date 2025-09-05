@@ -1,6 +1,5 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import { connectDatabase } from './config/connect-db.js';
 import AppRouter from './routes/app-router.js';
 import BlogRoutes from './routes/blog-routes.js';
@@ -35,13 +34,14 @@ app.use('/', BlogRoutes);
 // 404 handler - Catches all unmatched routes
 // This middleware runs when no previous route matches the request
 app.use((req, res) => {
+    console.error(`404 - Route not found: ${req.originalUrl}`);
     res.status(404).json({ error: 'Route not found' });
 });
 
 // Global error handler - Catches all unhandled errors
 // Must have 4 parameters (err, req, res, next) to be recognized as error middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    console.error(`Error stack: ${err.stack}`);
     res.status(500).json({ error: 'Something went wrong!' });
 });
 
@@ -49,23 +49,28 @@ app.use((err, req, res, next) => {
 // SERVER STARTUP
 // ================================
 const startServer = async () => {
+    console.log('Starting server...');
     const dbConnected = await connectDatabase();
     
     if (!dbConnected) {
+        console.error('Failed to connect to the database. Exiting...');
         process.exit(1);
     }
 
-    const PORT = process.env.PORT || 3000;
-    const isProduction = process.env.NODE_ENV === 'production';
-
-    app.listen(PORT, () => {
-        if (isProduction) {
-            console.log(`🚀 Server is running in production on port ${PORT}`);
-        } else {
-            console.log(`🚀 Server is running on http://localhost:${PORT}`);
-        }
-        console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    });
+    // listening to PORT is not required in some cloud platforms
+    if (process.env.PORT) {
+        app.listen(process.env.PORT, () => {
+            // NODE_ENV is undefined in local dev by default
+            if (process.env.NODE_ENV) {
+                console.log(`🚀 Server is running in ${process.env.NODE_ENV}`);
+            } else {
+                console.log(`🚀 Server is running on http://localhost:${process.env.PORT}`);
+            }
+        });
+    }
+    else {
+        console.log(`🚀 Server is running in production`);
+    }
 };
 
 startServer();
